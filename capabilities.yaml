@@ -1,0 +1,256 @@
+# ============================================================
+# Nova Capability Manifest
+# ============================================================
+# This file defines EXACTLY what Nova is allowed to do.
+# Edit this file directly to restrict or expand permissions.
+# The `denied` section is ABSOLUTE — it overrides every clearance level.
+#
+# Clearance levels (from your existing gateway):
+#   GREEN  = safe, read-only or reversible actions
+#   YELLOW = actions that modify state but are recoverable
+#   RED    = actions that are hard/impossible to reverse
+#   BLACK  = reserved, should require explicit manual override (not used by default)
+# ============================================================
+
+version: "1.0"
+
+# ─────────────────────────────────────────────────────────
+# ABSOLUTE DENYLIST — overrides ALL clearance levels, no exceptions
+# ─────────────────────────────────────────────────────────
+denied:
+  paths:
+    - "/System"
+    - "/Library/Keychains"
+    - "/private/var/db"
+    - "~/.ssh"
+    - "~/.aws"
+    - "~/.gnupg"
+    - "/etc"
+  apps:
+    - "Terminal"          # prevent Nova from controlling Terminal via AppleScript (could self-modify)
+    - "Keychain Access"
+    - "System Settings"
+    - "System Preferences"
+  actions:
+    - "format_disk"
+    - "disable_firewall"
+    - "disable_filevault"
+    - "modify_sudoers"
+    - "delete_system_files"
+    - "kill_process:kernel_task"
+    - "kill_process:WindowServer"
+
+# ─────────────────────────────────────────────────────────
+# GREEN — safe, reversible, no confirmation needed
+# ─────────────────────────────────────────────────────────
+green:
+  paths:
+    - "~/Downloads"
+    - "~/Documents"
+    - "~/Desktop"
+    - "~/nova"
+    - "~/jarvis-vault"
+  apps:
+    - "Safari"
+    - "Finder"
+    - "Notes"
+    - "Calendar"
+    - "Preview"
+  hardware: []   # no camera/mic/screen access at GREEN level
+  actions:
+    - "get_current_time"
+    - "scan_directory"
+    - "categorize_files"
+    - "search_files"
+    - "get_system_info"
+    - "get_storage_info"
+    - "list_processes"
+    - "list_running_apps"
+    - "get_cpu_usage"
+    - "get_system_info"
+    - "get_weather"
+    - "read_file"
+    - "web_search"
+    - "check_email"
+    - "set_reminder"
+    - "set_recurring"
+    - "list_jobs"
+    - "get_context"
+    - "get_preferences"
+    - "get_battery"
+    - "read_clipboard"
+    - "list_directory"
+    - "fetch_webpage"
+    - "get_frontmost_app"
+    - "list_today_events"
+    - "list_reminders"
+    - "recall_user_info"
+    - "recall_notes"
+    - "search_files"
+    - "get_file_info"
+    - "capture_camera"
+    - "analyze_photo"
+    - "close_tab"
+    - "press_key"
+    - "create_presentation"
+    - "self_diagnose"
+    - "self_read_code"
+    - "self_list_files"
+    - "self_list_backups"
+    - "self_fix"
+    - "self_write_code"
+    - "self_run_tests"
+    - "self_restore_backup"
+    - "get_disk_usage"
+    - "find_large_files"
+    - "get_memory_usage"
+    - "search_file_contents"
+    - "count_files"
+    - "compare_files"
+    - "list_recent_files"
+    - "get_file_stats"
+    - "batch_rename"
+    - "create_backup"
+    - "web_fetch"
+    - "wiki_search"
+    - "translate_text"
+    - "get_random_quote"
+    - "get_exchange_rate"
+    - "word_definition"
+    - "get_ip_info"
+    - "check_website_status"
+    - "calculator"
+    - "unit_convert"
+    - "generate_password"
+    - "hash_text"
+    - "base64_tool"
+    - "json_tool"
+    - "csv_tool"
+    - "qrcode_generate"
+    - "url_shortener"
+    - "color_convert"
+    - "world_clock"
+    - "countdown_timer"
+    - "stopwatch"
+    - "pomodoro"
+    - "note_quick"
+    - "list_notes"
+    - "todo_add"
+    - "todo_list"
+    - "todo_done"
+    - "clipboard_read"
+    - "generate_uuid"
+    - "text_stats"
+    - "markdown_to_html"
+    - "regex_test"
+    - "lorem_generate"
+    - "morse_code"
+    - "extract_archive"
+    - "encrypt_file"
+    - "take_screenshot"
+    - "network_ping"
+    - "get_uptime"
+
+# ─────────────────────────────────────────────────────────
+# AUTO — unattended, no prompt, but ONLY because code path hard-locks privacy to private
+# ─────────────────────────────────────────────────────────
+# This tier is BELOW green in privilege but is checked first. It exists for exactly one
+# action: auto_upload_youtube_video. The function itself hard-codes privacy_status="private"
+# and ignores any caller-supplied value, so even if the LLM hallucinates "public", the code
+# cannot publish. Public/unlisted always require YELLOW + explicit user confirmation via
+# upload_youtube_video. See core/tool_registry.py:auto_upload_youtube_video and
+# core/youtube_watcher.py for Daily Cap / Dead-letter / Token Health.
+auto:
+  paths:
+    - "~/Nova/assets/kids/output"
+    - "~/nova/assets/kids/output"
+  apps: []
+  hardware: []
+  actions:
+    - "auto_upload_youtube_video"
+
+# ─────────────────────────────────────────────────────────
+# YELLOW — modifies state, recoverable, requires confirmation
+# ─────────────────────────────────────────────────────────
+yellow:
+  paths:
+    - "~/Downloads"
+    - "~/Documents"
+    - "~/Desktop"
+  apps:
+    - "Safari"
+    - "Finder"
+    - "Mail"
+    - "Messages"
+  hardware:
+    - "screen_capture"   # screenshots only, requires confirmation
+  actions:
+    - "move_files"
+    - "copy_file"
+    - "create_folder"
+    - "compress_files"
+    - "set_volume"
+    - "set_brightness"
+    - "screenshot"
+    - "send_email"
+    - "draft_email"
+    - "launch_app"
+    - "close_app"
+    - "open_url"
+    - "cancel_job"
+    - "run_applescript"
+    - "write_clipboard"
+    - "write_file"
+    - "send_imessage"
+    - "add_calendar_event"
+    - "add_reminder"
+    - "remember_user_info"
+    - "forget_user_info"
+    - "add_note"
+    - "move_file"
+    - "copy_file"
+    - "create_folder"
+    - "play_music"
+    - "pause_music"
+    - "next_track"
+    - "previous_track"
+    - "set_brightness"
+    - "lock_screen"
+    - "sleep_system"
+    - "train_model"
+    - "create_soup_config"
+    - "check_gpu_status"
+    - "upload_youtube_video"
+
+# ─────────────────────────────────────────────────────────
+# RED — hard/impossible to reverse, ALWAYS requires confirmation
+# ─────────────────────────────────────────────────────────
+red:
+  paths:
+    - "~/Downloads"
+    - "~/Documents"
+    - "~/Desktop"
+  apps: []
+  hardware:
+    - "camera"
+    - "microphone"
+  actions:
+    - "delete_files"
+    - "empty_trash"
+    - "kill_process"
+    - "download"   # downloading arbitrary files from the web
+    - "delete_file"
+    - "shutdown_system"
+    - "restart_system"
+
+# ─────────────────────────────────────────────────────────
+# BLACK — reserved, disabled by default. Do not populate unless
+# you fully understand the risk. Requires manual code override
+# in capability_engine.py to ever be reachable.
+# ─────────────────────────────────────────────────────────
+black:
+  paths: []
+  apps: []
+  hardware: []
+  actions: []
+
