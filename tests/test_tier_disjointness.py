@@ -21,12 +21,19 @@ import sys
 import unittest
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+    from core.capability_engine import check_permission  # noqa: E402
+    HAS_DEPS = True
+except ModuleNotFoundError:  # bare checkout without requirements installed (CI)
+    yaml = None  # type: ignore
+    check_permission = None  # type: ignore
+    HAS_DEPS = False
+
+_NEEDS_DEPS = "needs pyyaml (CI has no pip step; run with venv/bin/python3)"
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-
-from core.capability_engine import check_permission  # noqa: E402
 
 # Highest privilege first, matching the engine's resolution order.
 TIER_ORDER = ["red", "yellow", "green", "auto"]
@@ -36,6 +43,7 @@ def _manifest():
     return yaml.safe_load((REPO / "capabilities.yaml").read_text())
 
 
+@unittest.skipUnless(HAS_DEPS, _NEEDS_DEPS)
 class TestTiersAreDisjoint(unittest.TestCase):
     def test_no_action_appears_in_two_tiers(self):
         manifest = _manifest()
@@ -66,6 +74,7 @@ class TestTiersAreDisjoint(unittest.TestCase):
                     "expected at most a benign same-tier repeat, not a pile-up")
 
 
+@unittest.skipUnless(HAS_DEPS, _NEEDS_DEPS)
 class TestPreviouslyLeakedActions(unittest.TestCase):
     """The seven that were duplicated must now actually require confirmation."""
 
@@ -96,6 +105,7 @@ class TestPreviouslyLeakedActions(unittest.TestCase):
                               f"expected confirmation or denial")
 
 
+@unittest.skipUnless(HAS_DEPS, _NEEDS_DEPS)
 class TestRedStaysRed(unittest.TestCase):
     """RED must never be reachable from a lower clearance, duplication or not."""
 

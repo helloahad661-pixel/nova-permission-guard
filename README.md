@@ -12,5 +12,4 @@ python -m unittest discover -s tests -v
 Edit the rules directly in `capabilities.yaml`. `test_tier_disjointness.py`
 fails the build if any action ever appears in two tiers at once.
 
-Maintained in Nova by `laya_agent` (decision engine). Extracted from the Nova
-monorepo as a portfolio piece.
+Part of [Nova](https://github.com/helloahad661-pixel/Nova), my macOS assistant system — `laya_agent` looks after this piece.
